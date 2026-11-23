@@ -1,6 +1,7 @@
 import { formatDate } from "@/lib/format";
 import type { Severity, TodaySummary } from "@/lib/types";
 import { SeverityDot } from "./SeverityBadge";
+import { ScrambleText } from "./ScrambleText";
 
 const ITEMS: { key: keyof Omit<TodaySummary, "total">; label: string; severity: Severity | null; tone: string }[] = [
   { key: "critical", label: "CRITICAL", severity: "CRITICAL", tone: "text-red-800" },
@@ -20,7 +21,7 @@ export function SummaryBar({ summary, nowIso }: { summary: TodaySummary; nowIso:
           </h2>
           <p className="text-xs text-slate-600 sm:mt-0.5">{formatDate(nowIso)}</p>
           <p className="font-mono text-2xl leading-none font-medium text-slate-900 tnum sm:mt-2">
-            {summary.total}
+            <ScrambleText text={String(summary.total)} />
             <span className="ml-1.5 font-sans text-xs font-normal text-slate-600">รายการ</span>
           </p>
         </div>
@@ -39,7 +40,9 @@ export function SummaryBar({ summary, nowIso }: { summary: TodaySummary; nowIso:
                   <SeverityDot severity={it.severity} />
                   {it.label}
                 </dt>
-                <dd className={`font-mono text-xl leading-none font-medium tnum ${n > 0 ? it.tone : "text-slate-400"}`}>{n}</dd>
+                <dd className={`font-mono text-xl leading-none font-medium tnum ${n > 0 ? it.tone : "text-slate-400"}`}>
+                  <ScrambleText text={String(n)} />
+                </dd>
               </div>
             );
           })}

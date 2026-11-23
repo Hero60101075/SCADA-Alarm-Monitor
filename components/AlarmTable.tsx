@@ -5,6 +5,7 @@ import { formatEventTime } from "@/lib/format";
 import type { AlarmRow } from "@/lib/types";
 import { SeverityBadge } from "./SeverityBadge";
 import { ValueCell } from "./ValueCell";
+import { ScrambleText } from "./ScrambleText";
 
 interface AlarmTableProps {
   rows: AlarmRow[];
@@ -46,7 +47,9 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
                 hl ? "bg-red-50/90 [&>td:first-child]:shadow-[inset_3px_0_0_var(--color-red-600)]" : "hover:bg-white/80"
               }`}
             >
-              <td className="py-2 pr-3 pl-4 align-top font-mono text-[13px] text-slate-800 tnum">{formatEventTime(r.event_time)}</td>
+              <td className="py-2 pr-3 pl-4 align-top font-mono text-[13px] text-slate-800 tnum">
+                <ScrambleText text={formatEventTime(r.event_time)} />
+              </td>
               <td className="px-3 py-2 align-top text-slate-800">{r.sub}</td>
               <td className="px-3 py-2 align-top">
                 <button
@@ -58,7 +61,7 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
                   }}
                   className="flex items-center gap-1 text-left font-mono text-[13px] font-medium break-words text-slate-900 group-hover:text-steel-700"
                 >
-                  {r.point}
+                  <ScrambleText text={r.point} />
                   <ChevronRight
                     aria-hidden
                     className="h-3.5 w-3.5 shrink-0 text-slate-400 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
@@ -75,13 +78,13 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
                 {pending ? (
                   <span className="mt-1 block h-3 w-16 rounded bg-slate-200 motion-safe:animate-pulse" aria-hidden />
                 ) : (
-                  <span className="font-mono text-[12px] font-medium text-slate-800">{r.caption}</span>
+                  <span className="font-mono text-[12px] font-medium text-slate-800"><ScrambleText text={r.caption ?? ""} /></span>
                 )}
               </td>
               <td className="py-2 pr-4 pl-3 align-top">
                 <SeverityBadge severity={r.severity} analyzing />
                 {!pending && (
-                  <span className="mt-1 block font-mono text-[11px] font-medium text-slate-700 lg:hidden">{r.caption}</span>
+                  <span className="mt-1 block font-mono text-[11px] font-medium text-slate-700 lg:hidden"><ScrambleText text={r.caption ?? ""} /></span>
                 )}
               </td>
             </tr>

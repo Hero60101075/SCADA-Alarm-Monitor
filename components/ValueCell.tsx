@@ -1,5 +1,6 @@
 import { formatNumber, thresholdState } from "@/lib/format";
 import type { AlarmRow } from "@/lib/types";
+import { ScrambleText } from "./ScrambleText";
 
 /** ค่า + threshold + เครื่องหมายเกิน/ต่ำกว่า (คำนวณจากข้อมูลดิบ ไม่ได้มาจาก AI) */
 export function ValueCell({
@@ -16,12 +17,12 @@ export function ValueCell({
       <span className="flex items-baseline gap-1.5">
         {state && <ThresholdFlag state={state} />}
         <span className={`font-mono text-[13px] tnum ${state ? "font-medium text-red-800" : "text-slate-900"}`}>
-          {formatNumber(row.value)}
+          <ScrambleText text={formatNumber(row.value)} />
         </span>
       </span>
       {hasTh && (
         <span className="font-mono text-[11px] whitespace-nowrap text-slate-600 tnum">
-          L {formatNumber(row.low_th)} · H {formatNumber(row.high_th)}
+          <ScrambleText text={`L ${formatNumber(row.low_th)} · H ${formatNumber(row.high_th)}`} />
         </span>
       )}
     </div>
