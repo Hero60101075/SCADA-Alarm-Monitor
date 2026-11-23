@@ -12,7 +12,7 @@ import { useEffect, useRef } from "react";
 const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*/<>";
 const KEEP = /[\s.,:·\-–—/()]/; // คงเครื่องหมายเว้นวรรค/วรรคตอนไว้ รูปทรงข้อความจะได้ไม่กระโดด
 const WINDOW_MS = 1500; // ช่วงเวลาหลัง mount ตัวแรกที่ยังเล่นเอฟเฟกต์
-const DURATION_MS = 900;
+const DURATION_MS = 1200;
 const TICK_MS = 45;
 
 let windowEnd: number | null = null;
