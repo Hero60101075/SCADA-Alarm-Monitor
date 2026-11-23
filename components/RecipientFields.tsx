@@ -71,7 +71,7 @@ export function RecipientFields({
       </div>
 
       <div className="mt-2.5 grid gap-x-3 gap-y-3.5 sm:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <label htmlFor={emailId} className="mb-1 block text-xs font-medium text-slate-700">
             Gmail
           </label>
@@ -98,7 +98,7 @@ export function RecipientFields({
           </p>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label htmlFor={lineId} className="mb-1 block text-xs font-medium text-slate-700">
             LINE User ID
           </label>

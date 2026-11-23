@@ -77,6 +77,31 @@ dialog::backdrop {
   backdrop-filter: blur(2px);
 }
 
+/* กันหน้าเลื่อนซ้าย-ขวาบนมือถือ (iOS ยอมให้เงา blob/blur ดันความกว้างหน้าได้)
+   ใช้ clip แทน hidden เพื่อไม่ให้ header แบบ sticky เสีย */
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* iOS Safari: ช่อง time/date ใช้ความกว้างของ control ตัวเองและไม่ยอมหดตาม w-full
+   ทำให้ล้นทับช่องข้างๆ — ปิด appearance ของ iOS และยอมให้หดได้ */
+@supports (-webkit-touch-callout: none) {
+  input[type="time"],
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+  input[type="time"]::-webkit-date-and-time-value,
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.5em;
+  }
+}
+
 /* มือถือ: ตัวอักษรในช่องกรอก 16px กัน iOS ซูมเมื่อแตะ และปุ่มสูงพอสำหรับนิ้ว */
 @media (max-width: 639px) {
   input:not([type="checkbox"]):not([type="radio"]),
