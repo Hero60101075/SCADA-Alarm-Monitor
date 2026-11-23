@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useId, useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { TriangleExclamationPoint } from "lucide-react";
 import { createAlarmAction } from "@/app/test/actions";
@@ -73,7 +73,8 @@ const COOLDOWN_SEC = 10;
 const inputCls =
   "h-9 w-full rounded-md border bg-white px-2.5 text-sm text-slate-900 transition-colors duration-150 placeholder:text-slate-400 aria-[invalid=true]:border-red-500 aria-[invalid=true]:bg-red-50/40";
 
-export function AlarmForm() {
+/** aside: เนื้อหาคอลัมน์ขวาบนจอกว้าง (เช่น รายการที่ทดสอบล่าสุด) — จอเล็กจะเรียงต่อด้านล่าง */
+export function AlarmForm({ aside }: { aside?: ReactNode }) {
   const router = useRouter();
   const uid = useId();
   const [values, setValues] = useState<AlarmFormInput>(EMPTY);
@@ -172,8 +173,8 @@ export function AlarmForm() {
   const blocked = cooldown > 0 || isPending;
 
   return (
-    <div className="space-y-4">
-      <section aria-labelledby="form-title" className="glass rounded-xl">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-start">
+      <section aria-labelledby="form-title" className="glass min-w-0 rounded-xl">
         <div className="flex flex-col gap-3 border-b border-slate-900/[0.06] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 id="form-title" className="text-sm font-semibold text-slate-900">
             ข้อมูล alarm ทดสอบ
@@ -183,7 +184,7 @@ export function AlarmForm() {
             <select
               value={preset}
               onChange={(e) => applyPreset(e.target.value)}
-              className="h-8 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 font-mono text-[12px] text-slate-900 sm:w-80"
+              className="h-8 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 font-mono text-[12px] text-slate-900 sm:w-80 xl:w-72 2xl:w-80"
             >
               <option value="">— เลือก preset —</option>
               {PRESETS.map((p, i) => (
@@ -196,8 +197,8 @@ export function AlarmForm() {
         </div>
 
         <form noValidate onSubmit={onSubmit} className="space-y-4 px-4 py-4">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-3.5 sm:grid-cols-6">
-            <Field label="เวลา (event_time)" id={fid("event_time")} error={errors.event_time} className="col-span-1 sm:col-span-1">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-3.5 md:grid-cols-6">
+            <Field label="เวลา (event_time)" id={fid("event_time")} error={errors.event_time} className="col-span-1 md:col-span-1">
               <input
                 id={fid("event_time")}
                 type="time"
@@ -209,7 +210,7 @@ export function AlarmForm() {
                 className={`${inputCls} font-mono tnum`}
               />
             </Field>
-            <Field label="สถานี (sub)" id={fid("sub")} error={errors.sub} className="col-span-1 sm:col-span-1">
+            <Field label="สถานี (sub)" id={fid("sub")} error={errors.sub} className="col-span-1 md:col-span-1">
               <input
                 id={fid("sub")}
                 type="text"
@@ -223,7 +224,7 @@ export function AlarmForm() {
                 className={`${inputCls} font-mono`}
               />
             </Field>
-            <Field label="Point" id={fid("point")} error={errors.point} className="col-span-2 sm:col-span-3">
+            <Field label="Point" id={fid("point")} error={errors.point} className="col-span-2 md:col-span-3">
               <input
                 id={fid("point")}
                 type="text"
@@ -237,7 +238,7 @@ export function AlarmForm() {
                 className={`${inputCls} font-mono`}
               />
             </Field>
-            <Field label="Type" id={fid("point_type")} error={errors.point_type} className="col-span-1 sm:col-span-1">
+            <Field label="Type" id={fid("point_type")} error={errors.point_type} className="col-span-1 md:col-span-1">
               <select
                 id={fid("point_type")}
                 value={values.point_type}
@@ -252,7 +253,7 @@ export function AlarmForm() {
                 ))}
               </select>
             </Field>
-            <Field label="Value" id={fid("value")} error={errors.value} className="col-span-1 sm:col-span-2">
+            <Field label="Value" id={fid("value")} error={errors.value} className="col-span-1 md:col-span-2">
               <input
                 id={fid("value")}
                 type="text"
@@ -266,7 +267,7 @@ export function AlarmForm() {
                 className={`${inputCls} font-mono tnum`}
               />
             </Field>
-            <Field label="Low threshold" hint="เว้นว่างได้" id={fid("low_th")} error={errors.low_th} className="col-span-1 sm:col-span-2">
+            <Field label="Low threshold" hint="เว้นว่างได้" id={fid("low_th")} error={errors.low_th} className="col-span-1 md:col-span-2">
               <input
                 id={fid("low_th")}
                 type="text"
@@ -279,7 +280,7 @@ export function AlarmForm() {
                 className={`${inputCls} font-mono tnum`}
               />
             </Field>
-            <Field label="High threshold" hint="เว้นว่างได้" id={fid("high_th")} error={errors.high_th} className="col-span-1 sm:col-span-2">
+            <Field label="High threshold" hint="เว้นว่างได้" id={fid("high_th")} error={errors.high_th} className="col-span-1 md:col-span-2">
               <input
                 id={fid("high_th")}
                 type="text"
@@ -352,9 +353,12 @@ export function AlarmForm() {
         </form>
       </section>
 
-      {tracking && (
-        <AnalysisTracker key={`${tracking.id}-${tracking.run}`} id={tracking.id} onSettled={() => router.refresh()} />
-      )}
+      <div className="min-w-0 space-y-4">
+        {tracking && (
+          <AnalysisTracker key={`${tracking.id}-${tracking.run}`} id={tracking.id} onSettled={() => router.refresh()} />
+        )}
+        {aside}
+      </div>
 
       <ConfirmDialog
         open={confirmOpen}

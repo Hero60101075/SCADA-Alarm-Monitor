@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "ทดสอบเพิ่ม alarm
 
 export default function TestPage() {
   return (
-    <div className="mx-auto max-w-4xl space-y-4">
+    <div className="mx-auto max-w-4xl space-y-4 xl:max-w-7xl">
       <div role="note" className="flex gap-3 rounded-xl border border-red-300 bg-red-50/95 px-4 py-3.5 text-sm text-red-950">
         <TriangleExclamationPoint aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-red-700" strokeWidth={1.75} />
         <div className="space-y-1">
@@ -77,9 +77,15 @@ async function TestContent() {
         </form>
       </div>
 
-      <AlarmForm />
-
-      {recent.ok ? <RecentTests rows={recent.rows} /> : <ErrorState title="โหลดรายการที่ทดสอบล่าสุดไม่สำเร็จ" message={recent.message} />}
+      <AlarmForm
+        aside={
+          recent.ok ? (
+            <RecentTests rows={recent.rows} />
+          ) : (
+            <ErrorState title="โหลดรายการที่ทดสอบล่าสุดไม่สำเร็จ" message={recent.message} />
+          )
+        }
+      />
     </>
   );
 }

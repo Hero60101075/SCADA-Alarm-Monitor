@@ -19,7 +19,7 @@ export function NavLinks() {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`whitespace-nowrap rounded-md px-2.5 py-1.5 sm:px-3 text-sm transition-colors duration-150 ${
+            className={`touch-target inline-flex items-center whitespace-nowrap rounded-md px-2.5 py-1.5 sm:px-3 text-sm transition-colors duration-150 ${
               active
                 ? "bg-white font-medium text-slate-900 shadow-[0_0_0_1px_rgb(15_23_42/0.08)]"
                 : "text-slate-600 hover:bg-white/70 hover:text-slate-900"

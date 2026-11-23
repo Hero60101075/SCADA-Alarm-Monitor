@@ -77,6 +77,22 @@ dialog::backdrop {
   backdrop-filter: blur(2px);
 }
 
+/* มือถือ: ตัวอักษรในช่องกรอก 16px กัน iOS ซูมเมื่อแตะ และปุ่มสูงพอสำหรับนิ้ว */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 2.75rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 2.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

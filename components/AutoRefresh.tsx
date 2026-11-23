@@ -37,7 +37,7 @@ export function AutoRefresh({ fetchedAt }: { fetchedAt: string }) {
   }, [running, router]);
 
   return (
-    <div className="flex items-center gap-2 text-xs text-slate-600">
+    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
       <span className="inline-flex items-center gap-1.5" aria-live="off">
         {isPending ? (
           <LoaderCircle aria-hidden className="h-3.5 w-3.5 text-slate-500 motion-safe:animate-spin" strokeWidth={1.75} />
@@ -58,7 +58,7 @@ export function AutoRefresh({ fetchedAt }: { fetchedAt: string }) {
         type="button"
         onClick={() => startTransition(() => router.refresh())}
         disabled={isPending}
-        className="rounded-md p-1.5 text-slate-600 transition-colors duration-150 hover:bg-white hover:text-slate-900 disabled:opacity-50"
+        className="touch-target inline-flex min-w-8 items-center justify-center rounded-md p-1.5 text-slate-600 transition-colors duration-150 hover:bg-white hover:text-slate-900 disabled:opacity-50"
         aria-label="อัปเดตตอนนี้"
         title="อัปเดตตอนนี้"
       >
@@ -68,7 +68,7 @@ export function AutoRefresh({ fetchedAt }: { fetchedAt: string }) {
         type="button"
         onClick={() => setRunning((r) => !r)}
         aria-pressed={!running}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
+        className="touch-target inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50"
       >
         {running ? (
           <>

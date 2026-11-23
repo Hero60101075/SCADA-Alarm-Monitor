@@ -20,7 +20,7 @@ export function ValueCell({
         </span>
       </span>
       {hasTh && (
-        <span className="font-mono text-[11px] text-slate-600 tnum">
+        <span className="font-mono text-[11px] whitespace-nowrap text-slate-600 tnum">
           L {formatNumber(row.low_th)} · H {formatNumber(row.high_th)}
         </span>
       )}

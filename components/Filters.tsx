@@ -70,7 +70,7 @@ export function Filters({ value, stations }: { value: AlarmFilters; stations: st
               type="button"
               aria-pressed={active}
               onClick={() => toggleSeverity(s)}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 transition-colors duration-150 ring-inset ${
+              className={`touch-target inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ring-1 transition-colors duration-150 ring-inset ${
                 active
                   ? "bg-slate-900 text-white ring-slate-900"
                   : "bg-white/80 text-slate-700 ring-slate-300 hover:bg-white hover:text-slate-900"
@@ -124,7 +124,7 @@ export function Filters({ value, stations }: { value: AlarmFilters; stations: st
               window.clearTimeout(debounce.current);
               apply({ severities: [], sub: null, q: null });
             }}
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-steel-700 transition-colors duration-150 hover:bg-white"
+            className="touch-target inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-steel-700 transition-colors duration-150 hover:bg-white"
           >
             <FunnelX aria-hidden className="h-3.5 w-3.5" strokeWidth={1.75} />
             ล้างตัวกรอง

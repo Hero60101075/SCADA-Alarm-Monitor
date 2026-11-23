@@ -23,11 +23,15 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
         <tr className="[&>th]:border-b [&>th]:border-slate-900/[0.08]">
           <th scope="col" className={`${TH} w-16 pl-4`}>เวลา</th>
           <th scope="col" className={`${TH} w-20`}>สถานี</th>
-          <th scope="col" className={TH}>Point</th>
-          <th scope="col" className={`${TH} w-14`}>Type</th>
-          <th scope="col" className={`${TH} w-44 text-right`}>Value</th>
-          <th scope="col" className={`${TH} w-28`}>Caption</th>
-          <th scope="col" className={`${TH} w-36 pr-4`}>Severity</th>
+          <th scope="col" className={TH}>
+            Point<span className="lg:hidden"> · Type</span>
+          </th>
+          <th scope="col" className={`${TH} hidden w-14 lg:table-cell`}>Type</th>
+          <th scope="col" className={`${TH} w-40 text-right lg:w-44`}>Value</th>
+          <th scope="col" className={`${TH} hidden w-28 lg:table-cell`}>Caption</th>
+          <th scope="col" className={`${TH} w-36 pr-4`}>
+            Severity<span className="lg:hidden"> · Caption</span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -61,12 +65,13 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
                     strokeWidth={1.75}
                   />
                 </button>
+                <span className="mt-0.5 block font-mono text-[11px] text-slate-600 lg:hidden">{r.point_type}</span>
               </td>
-              <td className="px-3 py-2 align-top font-mono text-[12px] text-slate-700">{r.point_type}</td>
+              <td className="hidden px-3 py-2 align-top font-mono text-[12px] text-slate-700 lg:table-cell">{r.point_type}</td>
               <td className="px-3 py-2 align-top text-right">
                 <ValueCell row={r} />
               </td>
-              <td className="px-3 py-2 align-top">
+              <td className="hidden px-3 py-2 align-top lg:table-cell">
                 {pending ? (
                   <span className="mt-1 block h-3 w-16 rounded bg-slate-200 motion-safe:animate-pulse" aria-hidden />
                 ) : (
@@ -75,6 +80,9 @@ export function AlarmTable({ rows, highlighted, onSelect }: AlarmTableProps) {
               </td>
               <td className="py-2 pr-4 pl-3 align-top">
                 <SeverityBadge severity={r.severity} analyzing />
+                {!pending && (
+                  <span className="mt-1 block font-mono text-[11px] font-medium text-slate-700 lg:hidden">{r.caption}</span>
+                )}
               </td>
             </tr>
           );

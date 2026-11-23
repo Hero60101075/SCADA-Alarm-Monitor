@@ -36,7 +36,7 @@ export function RecentTests({ rows }: { rows: RecentTestRow[] }) {
 
   return (
     <section aria-labelledby="recent-title" className="glass overflow-hidden rounded-xl">
-      <div className="flex items-baseline justify-between gap-3 border-b border-slate-900/[0.06] px-4 py-3">
+      <div className="flex flex-col gap-0.5 border-b border-slate-900/[0.06] px-4 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
         <h2 id="recent-title" className="text-sm font-semibold text-slate-900">
           รายการที่ทดสอบล่าสุด
         </h2>
@@ -72,7 +72,7 @@ export function RecentTests({ rows }: { rows: RecentTestRow[] }) {
                   setNotice(null);
                   setTarget(r);
                 }}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-red-800 transition-colors duration-150 hover:bg-red-50"
+                className="touch-target inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-red-800 transition-colors duration-150 hover:bg-red-50"
                 aria-label={`ลบ ${r.point} (${formatEventTime(r.event_time)})`}
               >
                 <Trash aria-hidden className="h-3.5 w-3.5" strokeWidth={1.75} />
