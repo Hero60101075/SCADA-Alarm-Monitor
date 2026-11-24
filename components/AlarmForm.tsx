@@ -9,7 +9,18 @@ import { POINT_TYPES } from "@/lib/types";
 import { alarmFormSchema, toFieldErrors, type AlarmFormField, type AlarmFormInput, type FieldErrors } from "@/lib/validation";
 import { AnalysisTracker } from "./AnalysisTracker";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { PresetSelect } from "./PresetSelect";
 import { RecipientFields } from "./RecipientFields";
+
+/** เวลาปัจจุบันตามเวลาประเทศไทย (Asia/Bangkok) รูปแบบ HH:MM — ใช้แทนเวลาใน preset */
+function bangkokNowHHMM(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Bangkok",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+}
 
 const EMPTY: AlarmFormInput = {
   event_time: "",
@@ -129,8 +140,17 @@ export function AlarmForm({ aside }: { aside?: ReactNode }) {
     if (idx === "") return;
     const p = PRESETS[Number(idx)];
     if (!p) return;
-    // เติมเฉพาะข้อมูล alarm ไม่แตะผู้รับแจ้งเตือน
-    setValues((s) => ({ ...s, ...p }));
+    // เติมเฉพาะข้อมูล alarm ไม่แตะผู้รับแจ้งเตือน (expected ใช้แสดงผลใน dropdown เท่านั้น)
+    setValues((s) => ({
+      ...s,
+      event_time: bangkokNowHHMM(),
+      sub: p.sub,
+      point: p.point,
+      point_type: p.point_type,
+      value: p.value,
+      low_th: p.low_th,
+      high_th: p.high_th,
+    }));
     setErrors({});
     setFormError(null);
   };
@@ -179,21 +199,12 @@ export function AlarmForm({ aside }: { aside?: ReactNode }) {
           <h2 id="form-title" className="text-sm font-semibold text-slate-900">
             ข้อมูล alarm ทดสอบ
           </h2>
-          <label className="flex items-center gap-2 text-xs text-slate-600">
-            <span className="shrink-0">เติมจาก preset</span>
-            <select
-              value={preset}
-              onChange={(e) => applyPreset(e.target.value)}
-              className="h-8 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 font-mono text-[12px] text-slate-900 sm:w-80 xl:w-72 2xl:w-80"
-            >
-              <option value="">— เลือก preset —</option>
-              {PRESETS.map((p, i) => (
-                <option key={i} value={i}>
-                  {p.event_time} · {p.point_type} · {p.point}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <span id="preset-label" className="shrink-0">
+              เติมจาก preset
+            </span>
+            <PresetSelect value={preset} onChange={applyPreset} labelId="preset-label" />
+          </div>
         </div>
 
         <form noValidate onSubmit={onSubmit} className="space-y-4 px-4 py-4">
