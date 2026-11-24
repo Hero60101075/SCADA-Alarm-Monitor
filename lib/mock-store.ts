@@ -65,7 +65,7 @@ function mockAnalyze(e: NewScadaEvent): MockAnalysis {
       caption,
       severity: caption === "OPEN" ? "WARNING" : "INFO",
       recommended_action: [
-        `ยืนยันสถานะ ${e.point} กับหน้าจอ SCADA และหน้างาน`,
+        `ยืนยันสถานะ ${e.point} กับหน้าจอระบบควบคุมและหน้างาน`,
         "ตรวจสอบว่ามีการสั่งการตามแผนงานหรือไม่",
         "บันทึกเหตุการณ์ลงสมุดบันทึกประจำกะ",
       ].join("\n"),

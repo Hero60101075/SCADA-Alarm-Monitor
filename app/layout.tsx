@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans_Thai } from "next/font/google";
+import { DemoNotice } from "@/components/DemoNotice";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -19,10 +20,10 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SCADA Alarm Monitor",
-    template: "%s · SCADA Alarm Monitor",
+    default: "Alarm Monitor",
+    template: "%s · Alarm Monitor",
   },
-  description: "ติดตาม alarm และผลวิเคราะห์ของสถานีไฟฟ้า",
+  description: "ติดตาม alarm และผลวิเคราะห์ของสถานีไฟฟ้า (ข้อมูลจำลองเพื่อการทดสอบและสาธิต)",
   robots: { index: false, follow: false },
 };
 
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           ข้ามไปยังเนื้อหาหลัก
         </a>
         <SiteHeader />
+        <DemoNotice />
         <main id="main" className="mx-auto w-full max-w-350 px-3 pb-16 sm:px-5 lg:px-8">
           {children}
         </main>

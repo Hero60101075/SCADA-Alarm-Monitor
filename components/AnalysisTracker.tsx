@@ -88,7 +88,7 @@ export function AnalysisTracker({ id, onSettled }: { id: string; onSettled: () =
 
       <ol className="space-y-0 px-4 py-4" aria-live="polite">
         <Step state="done" title="บันทึกแล้ว" last={false}>
-          บันทึกลง scada_events สำเร็จ — Database Webhook จะส่งต่อไปที่ Make
+          บันทึกลงฐานข้อมูลสำเร็จ — Database Webhook จะส่งต่อไปที่ Make
         </Step>
 
         <Step
@@ -109,7 +109,7 @@ export function AnalysisTracker({ id, onSettled }: { id: string; onSettled: () =
               <ul className="list-disc space-y-0.5 pl-5">
                 <li>Make → Scenario → History: มีการรันจาก webhook นี้หรือไม่ และมี error หรือไม่</li>
                 <li>Scenario เปิดอยู่ (ON) และไม่ได้ถูกหยุดเพราะ credit หมด</li>
-                <li>Supabase → Database → Webhooks: webhook ของ INSERT บน scada_events ยังเปิดอยู่</li>
+                <li>Supabase → Database → Webhooks: webhook ที่ตั้งไว้สำหรับการเพิ่ม alarm (INSERT) ยังเปิดอยู่</li>
                 <li>ดู response ของ webhook queue ในตาราง net._http_response (pg_net)</li>
               </ul>
               <button

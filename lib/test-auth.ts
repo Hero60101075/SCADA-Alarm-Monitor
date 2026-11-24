@@ -85,7 +85,7 @@ export async function isTestAuthenticated(): Promise<boolean> {
 /* ---------- รายการ id ที่ทดสอบจากเบราว์เซอร์นี้ ----------
  * ไม่มีคอลัมน์ในฐานข้อมูลที่บอกว่าแถวไหนมาจากหน้าทดสอบ (และห้ามแก้ schema)
  * จึงเก็บ id ที่เพิ่มผ่านหน้านี้ไว้ใน httpOnly cookie และอนุญาตให้ลบได้เฉพาะ id เหล่านี้
- * เพื่อกันการลบ alarm จริงจาก SCADA โดยไม่ตั้งใจ
+ * เพื่อกันการลบ alarm จริงโดยไม่ตั้งใจ
  */
 
 export async function getTestedIds(): Promise<string[]> {

@@ -96,7 +96,7 @@ export function RecentTests({ rows }: { rows: RecentTestRow[] }) {
           <div className="space-y-2">
             <p>
               ลบ <span className="font-mono font-medium text-slate-900">{target.point}</span> ({target.sub},{" "}
-              <span className="font-mono tnum">{formatEventTime(target.event_time)}</span>) ออกจาก scada_events
+              <span className="font-mono tnum">{formatEventTime(target.event_time)}</span>) ออกจากฐานข้อมูล
             </p>
             <p className="text-slate-600">
               ผลวิเคราะห์ใน alarm_analyses จะถูกลบตามไปด้วย (cascade) — การลบไม่ทำให้ Make ทำงาน เพราะ webhook ตั้งไว้เฉพาะ INSERT
