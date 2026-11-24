@@ -132,7 +132,7 @@ lib/
   supabase-server.ts         Supabase client (server-only, service role)
   alarms.ts                  query functions (สลับไป mock เมื่อ USE_MOCK_DATA=true)
   validation.ts              zod schema ใช้ร่วมกันทั้ง client และ server
-  presets.ts                 ชุดข้อมูลทดสอบ 11 รายการ
+  presets.ts                 ชุดข้อมูลทดสอบ 30 รายการ
   test-auth.ts               session ของหน้า /test
   mock-store.ts              ข้อมูลจำลอง
   mask.ts                    ปิดบังอีเมล / LINE User ID
