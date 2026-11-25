@@ -59,12 +59,13 @@ cp .env.local.example .env.local
 3. **Supabase** → Authentication → URL Configuration
    - Site URL: URL หลักของเว็บ เช่น `https://scada-alarm-monitor.vercel.app`
    - Redirect URLs: เพิ่ม `http://localhost:3000/auth/callback` และ `https://scada-alarm-monitor.vercel.app/auth/callback`
-4. **Supabase** → SQL Editor: รัน `supabase/visit_logs.sql` (บันทึกการเข้าชม) และ `supabase/alarm_submissions.sql` (นับจำนวนครั้งที่ส่งข้อมูล)
+4. **Supabase** → SQL Editor: รัน `supabase/visit_logs.sql` (บันทึกการเข้าชม) และ `supabase/alarm_submissions.sql` (นับจำนวนครั้งที่ส่งข้อมูล) และ `supabase/alarm_acks.sql` (Acknowledge alarm)
 5. ใส่ `SUPABASE_PUBLISHABLE_KEY` ใน `.env.local` และใน Vercel → Settings → Environment Variables แล้ว redeploy
 
 การทำงาน
 - `proxy.ts` refresh session และ redirect ผู้ที่ยังไม่ login ไป `/login` (หน้า / Server Action ยังตรวจซ้ำเองด้วย)
 - `components/VisitLogger.tsx` บันทึกทุกครั้งที่เปลี่ยนหน้า (ไม่นับ auto refresh) → `visit_logs`: เวลา, user id, อีเมล, path, IP, user agent
+- **Acknowledge:** alarm ที่ยังไม่ ack จะมีพื้นหลังสีฟ้าเทาในตาราง Dashboard จนกว่าจะมีคนกด Acknowledge (ใช้ร่วมกันทุกคน เก็บว่าใคร ack เมื่อไร ใน `alarm_acks`) — alarm ที่มีอยู่ก่อนรัน SQL ถือว่า ack แล้ว ถ้ายังไม่รัน SQL จะไม่ไฮไลต์
 - การกด "เพิ่ม alarm" ที่ส่งสำเร็จในหน้า `/test` ถูกบันทึก 1 แถวใน `alarm_submissions` (เวลา, อีเมล, event id, สถานี, point, ประเภท) → หน้า `/admin/visits` แสดงจำนวนครั้งที่ส่งต่อคน + รายการส่งข้อมูล
 - สิทธิ์: อีเมลใน `ADMIN_EMAILS` = **ADMIN** ดูหน้า `/admin/visits` (สรุปตามผู้ใช้ + รายการเข้าชม 1,000 รายการล่าสุด) ได้
   คนอื่นทั้งหมด = **USER** เข้า `/admin/visits` จะเจอหน้า "ไม่มีสิทธิ์" (ตรวจฝั่ง server ก่อนดึงข้อมูล)
@@ -174,6 +175,9 @@ app/
 proxy.ts                     บังคับ login ทุกหน้า + refresh session
 supabase/visit_logs.sql      SQL สร้างตาราง visit_logs
 supabase/alarm_submissions.sql  SQL สร้างตาราง alarm_submissions (นับการส่งข้อมูล)
+supabase/alarm_acks.sql      SQL สร้างตาราง alarm_acks (Acknowledge ใช้ร่วมกันทุกคน)
+supabase/simulate_alarms.sql จำลอง alarm + ผล AI โดยไม่เรียก Make (ไม่เสีย credit / ไม่ส่งแจ้งเตือน)
+lib/acks.ts                  อ่าน/บันทึกสถานะ acknowledge
 lib/submissions.ts           บันทึก/ดึงประวัติการส่งข้อมูล
 components/
   SeverityBadge, AlarmTable, AlarmCard, AlarmDrawer, AlarmList,

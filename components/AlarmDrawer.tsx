@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { TriangleExclamationPoint, X } from "lucide-react";
-import { formatDateTime, formatDuration, formatEventTime, splitActions } from "@/lib/format";
+import { BellCheck, TriangleExclamationPoint, X } from "lucide-react";
+import type { AckInfo } from "@/lib/acks";
+import { formatDateTime, formatDuration, formatEventDate, formatEventTime, splitActions } from "@/lib/format";
 import type { AlarmRow } from "@/lib/types";
 import { SeverityBadge } from "./SeverityBadge";
 import { ValueCell } from "./ValueCell";
@@ -11,10 +12,14 @@ interface AlarmDrawerProps {
   row: AlarmRow | null;
   open: boolean;
   onClose: () => void;
+  /** ข้อมูลการ ack จาก server (null = ยังไม่ ack หรือยังไม่เปิดใช้) */
+  ack: AckInfo | null;
+  unacked: boolean;
+  onAck: () => void;
 }
 
 /** panel รายละเอียดด้านขวา ใช้ <dialog> แบบ modal เพื่อจัดการ focus/Esc ให้ถูกต้อง */
-export function AlarmDrawer({ row, open, onClose }: AlarmDrawerProps) {
+export function AlarmDrawer({ row, open, onClose, ack, unacked, onAck }: AlarmDrawerProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -57,7 +62,8 @@ export function AlarmDrawer({ row, open, onClose }: AlarmDrawerProps) {
                 <span className="mx-1.5 text-slate-400">·</span>
                 Type <span className="font-mono text-slate-800">{row.point_type}</span>
                 <span className="mx-1.5 text-slate-400">·</span>
-                เวลา <span className="font-mono text-slate-800 tnum">{formatEventTime(row.event_time)}</span>
+                เวลา <span className="text-slate-800">{formatEventDate(row)}</span>{" "}
+                <span className="font-mono text-slate-800 tnum">{formatEventTime(row.event_time)}</span>
               </p>
               <h2 id="alarm-drawer-title" className="mt-1 font-mono text-[15px] leading-snug font-medium break-words">
                 {row.point}
@@ -83,6 +89,20 @@ export function AlarmDrawer({ row, open, onClose }: AlarmDrawerProps) {
           </header>
 
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+            {unacked && (
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-steel-100/70 px-3.5 py-2.5 ring-1 ring-steel-200 ring-inset">
+                <p className="text-sm text-steel-800">alarm นี้ยังไม่ได้ acknowledge</p>
+                <button
+                  type="button"
+                  onClick={onAck}
+                  className="touch-target inline-flex shrink-0 items-center gap-1.5 rounded-md bg-steel-600 px-2.5 py-1 text-xs font-medium text-white transition-colors duration-150 hover:bg-steel-700"
+                >
+                  <BellCheck aria-hidden className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  Acknowledge
+                </button>
+              </div>
+            )}
+
             <section aria-labelledby="drawer-value">
               <h3 id="drawer-value" className="text-xs font-medium text-slate-600">
                 ค่าที่วัดได้
@@ -145,6 +165,15 @@ export function AlarmDrawer({ row, open, onClose }: AlarmDrawerProps) {
                 <dd className="text-slate-900 tnum">{formatDuration(row.received_at, row.analyzed_at)}</dd>
                 <dt className="text-slate-600">โมเดล</dt>
                 <dd className="font-mono text-[13px] break-all text-slate-900">{row.ai_model ?? "—"}</dd>
+                {ack && (
+                  <>
+                    <dt className="text-slate-600">Acknowledge</dt>
+                    <dd className="text-slate-900 tnum">
+                      {formatDateTime(ack.at)}
+                      {ack.by && <span className="block text-[13px] break-all text-slate-600">โดย {ack.by}</span>}
+                    </dd>
+                  </>
+                )}
                 <dt className="text-slate-600">Alarm ID</dt>
                 <dd className="font-mono text-[12px] break-all text-slate-700">{row.id}</dd>
               </dl>

@@ -5,7 +5,9 @@ import { AlarmList } from "@/components/AlarmList";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { Filters } from "@/components/Filters";
 import { EmptyState, ErrorState, MockBadge } from "@/components/StatePanels";
+import { StickyListHeader } from "@/components/StickyListHeader";
 import { SummaryBar } from "@/components/SummaryBar";
+import { getAcks, type AckInfo } from "@/lib/acks";
 import { getCurrentUser } from "@/lib/auth";
 import { DataError, LIST_LIMIT, getRecentAlarms, getStations, getTodaySummary, parseFilters } from "@/lib/alarms";
 import { ConfigError, isMockMode } from "@/lib/supabase-server";
@@ -22,7 +24,7 @@ export default function DashboardPage({ searchParams }: PageProps<"/">) {
 }
 
 type LoadResult = { fetchedAt: string } & (
-  | { ok: true; summary: TodaySummary; rows: AlarmRow[]; stations: string[] }
+  | { ok: true; summary: TodaySummary; rows: AlarmRow[]; stations: string[]; acks: Record<string, AckInfo> | null }
   | { ok: false; message: string; isConfig: boolean }
 );
 
@@ -37,7 +39,9 @@ async function load(filters: AlarmFilters): Promise<LoadResult> {
       getRecentAlarms(filters),
       getStations(),
     ]);
-    return { fetchedAt, ok: true, summary, rows, stations };
+    // สถานะ acknowledge (null = ยังไม่ได้สร้างตาราง alarm_acks → ไม่ไฮไลต์)
+    const acks = await getAcks(rows.map((r) => r.id));
+    return { fetchedAt, ok: true, summary, rows, stations, acks };
   } catch (err) {
     if (err instanceof ConfigError) return { fetchedAt, ok: false, message: err.message, isConfig: true };
     if (err instanceof DataError) return { fetchedAt, ok: false, message: err.userMessage, isConfig: false };
@@ -76,8 +80,9 @@ async function DashboardContent({ searchParams }: { searchParams: PageProps<"/">
         <>
           <SummaryBar summary={result.summary} nowIso={fetchedAt} />
 
-          <section aria-labelledby="list-title" className="glass overflow-hidden rounded-xl">
-            <div className="space-y-3 border-b border-slate-900/[0.06] px-4 py-3">
+          {/* overflow-clip (ไม่ใช่ overflow-hidden) เพื่อให้ position: sticky ภายในยังทำงาน */}
+          <section aria-labelledby="list-title" className="glass overflow-clip rounded-xl">
+            <StickyListHeader className="space-y-3 border-b border-slate-900/[0.06] px-4 py-3">
               <div className="flex items-baseline justify-between gap-3">
                 <h2 id="list-title" className="text-sm font-semibold text-slate-900">
                   Alarm ล่าสุด
@@ -87,7 +92,7 @@ async function DashboardContent({ searchParams }: { searchParams: PageProps<"/">
                 </p>
               </div>
               <Filters value={filters} stations={result.stations} />
-            </div>
+            </StickyListHeader>
 
             {result.rows.length === 0 ? (
               filtered ? (
@@ -98,7 +103,7 @@ async function DashboardContent({ searchParams }: { searchParams: PageProps<"/">
                 </EmptyState>
               )
             ) : (
-              <AlarmList rows={result.rows} />
+              <AlarmList rows={result.rows} acks={result.acks} />
             )}
           </section>
         </>

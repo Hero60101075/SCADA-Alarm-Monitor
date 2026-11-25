@@ -7,7 +7,36 @@ export function formatEventTime(t: string): string {
   return t.slice(0, 5);
 }
 
-const dateTimeFmt = new Intl.DateTimeFormat("th-TH", {
+const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7 ไม่มี DST
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const eventDateFmt = new Intl.DateTimeFormat("th-TH", {
+  timeZone: "UTC", // คำนวณเป็นวันที่เวลาไทยแล้ว จึงจัดรูปแบบตาม UTC
+  day: "numeric",
+  month: "short",
+  year: "2-digit",
+});
+
+/**
+ * วันที่เกิด alarm เช่น "25 พ.ย. 69"
+ * event_time เก็บแค่เวลา จึงใช้วันที่ของ received_at (เวลาไทย) แทน
+ * กรณีข้ามเที่ยงคืน (เช่น เกิด 23:59 แต่ได้รับ 00:01) เวลาเกิดจะมากกว่าเวลาที่ได้รับเกิน 12 ชม. → ถอยไป 1 วัน
+ */
+export function formatEventDate(row: Pick<AlarmRow, "event_time" | "received_at">): string {
+  const received = new Date(row.received_at).getTime();
+  if (Number.isNaN(received)) return "";
+  const local = received + BANGKOK_OFFSET_MS;
+  const dayStart = Math.floor(local / DAY_MS) * DAY_MS;
+  const [h, m] = row.event_time.split(":").map(Number);
+  let date = dayStart;
+  if (Number.isFinite(h) && Number.isFinite(m)) {
+    const eventMs = (h * 60 + m) * 60 * 1000;
+    if (eventMs - (local - dayStart) > 12 * 60 * 60 * 1000) date -= DAY_MS;
+  }
+  return eventDateFmt.format(new Date(date));
+}
+
+const dateTimeFmt =new Intl.DateTimeFormat("th-TH", {
   timeZone: APP_TIME_ZONE,
   day: "numeric",
   month: "short",
@@ -86,6 +115,7 @@ export function splitActions(text: string | null): string[] {
   if (!text) return [];
   return text
     .split(/\r?\n/)
-    .map((l) => l.trim().replace(/^(?:\d+[.)]|[-•*])\s+/, ""))
+    // ตัดเลขข้อทั้ง "3. xxx" และ "3.xxx" (ไม่มีเว้นวรรค) แต่ไม่ตัดตัวเลขทศนิยมเช่น "3.5 kV"
+    .map((l) => l.trim().replace(/^(?:\d+[.)](?!\d)|[-•*])\s*/, ""))
     .filter((l) => l.length > 0);
 }

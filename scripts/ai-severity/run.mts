@@ -197,6 +197,16 @@ for (const s of SEVERITIES) {
 }
 if (RUNS > 1) console.log(`ผลไม่คงที่ระหว่างรอบ: ${unstable.length ? unstable.map((r) => `#${r.no}`).join(", ") : "ไม่มี"}`);
 
+// อักษรที่ไม่ควรมีในคำแนะนำ (ญี่ปุ่น/จีน/เกาหลี) — โมเดลบางครั้งเขียนศัพท์เทคนิคเป็นคาตาคานะ เช่น トリップ
+const FOREIGN_SCRIPT = /[぀-ヿ㐀-鿿가-힯]/;
+const foreign = results.flatMap((r) =>
+  r.runs.flatMap((run) => run.actions.filter((a) => FOREIGN_SCRIPT.test(a)).map((a) => ({ no: r.no, text: a }))),
+);
+if (foreign.length) {
+  console.log("\n\x1b[33m⚠ คำแนะนำมีภาษาอื่นปน (ญี่ปุ่น/จีน/เกาหลี):\x1b[0m");
+  for (const f of foreign) console.log(`  #${f.no} ${f.text}`);
+}
+
 const mismatches = results.filter((r) => !r.match);
 if (mismatches.length) {
   console.log("\nเคสที่ไม่ตรง:");

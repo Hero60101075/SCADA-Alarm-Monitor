@@ -1,6 +1,6 @@
 "use client";
 
-import { formatEventTime } from "@/lib/format";
+import { formatEventDate, formatEventTime } from "@/lib/format";
 import type { AlarmRow } from "@/lib/types";
 import { SeverityBadge } from "./SeverityBadge";
 import { ValueCell } from "./ValueCell";
@@ -9,11 +9,13 @@ import { ScrambleText } from "./ScrambleText";
 interface AlarmCardProps {
   row: AlarmRow;
   highlighted: boolean;
+  /** ยังไม่ acknowledge (กด ack ได้ในหน้ารายละเอียด) */
+  unacked: boolean;
   onSelect: (row: AlarmRow) => void;
 }
 
 /** การ์ดสำหรับมือถือ (ทั้งใบเป็นปุ่ม) */
-export function AlarmCard({ row, highlighted, onSelect }: AlarmCardProps) {
+export function AlarmCard({ row, highlighted, unacked, onSelect }: AlarmCardProps) {
   const pending = row.severity === null;
   return (
     <button
@@ -21,10 +23,15 @@ export function AlarmCard({ row, highlighted, onSelect }: AlarmCardProps) {
       aria-haspopup="dialog"
       onClick={() => onSelect(row)}
       className={`block w-full px-3.5 py-3 text-left transition-colors duration-200 ${
-        highlighted ? "bg-red-50/90 shadow-[inset_3px_0_0_var(--color-red-600)]" : "active:bg-white/80"
+        highlighted
+          ? "bg-red-50/90 shadow-[inset_3px_0_0_var(--color-red-600)]"
+          : unacked
+            ? "bg-steel-100/70 shadow-[inset_3px_0_0_var(--color-steel-600)]"
+            : "active:bg-white/80"
       }`}
     >
       <div className="flex items-center gap-2 text-xs text-slate-600">
+        <span className="text-slate-600">{formatEventDate(row)}</span>
         <span className="font-mono text-[13px] text-slate-800 tnum"><ScrambleText text={formatEventTime(row.event_time)} /></span>
         <span className="text-slate-400">·</span>
         <span className="text-slate-800">{row.sub}</span>
@@ -34,6 +41,7 @@ export function AlarmCard({ row, highlighted, onSelect }: AlarmCardProps) {
           <SeverityBadge severity={row.severity} analyzing />
         </span>
       </div>
+      {unacked && <span className="sr-only">ยังไม่ acknowledge</span>}
       <p className="mt-1.5 font-mono text-[13px] leading-snug font-medium break-words text-slate-900">
         <ScrambleText text={row.point} />
       </p>
