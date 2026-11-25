@@ -6,6 +6,7 @@ import { LogOut, TriangleExclamationPoint } from "lucide-react";
 import { AlarmForm } from "@/components/AlarmForm";
 import { RecentTests } from "@/components/RecentTests";
 import { ErrorState, MockBadge } from "@/components/StatePanels";
+import { getCurrentUser } from "@/lib/auth";
 import { DataError, getAlarmsByIds, getTestRecipients } from "@/lib/alarms";
 import { ConfigError, isMockMode } from "@/lib/supabase-server";
 import { getTestedIds, isTestAuthenticated } from "@/lib/test-auth";
@@ -54,6 +55,8 @@ async function loadRecent(ids: string[]): Promise<RecentResult> {
 
 async function TestContent() {
   await connection();
+  const user = await getCurrentUser();
+  if (!user) redirect("/login?next=/test");
   if (!(await isTestAuthenticated())) redirect("/test/login");
 
   const ids = await getTestedIds();
@@ -78,6 +81,7 @@ async function TestContent() {
       </div>
 
       <AlarmForm
+        loginEmail={user.email}
         aside={
           recent.ok ? (
             <RecentTests rows={recent.rows} />

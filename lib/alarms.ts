@@ -34,8 +34,17 @@ export class DataError extends Error {
   }
 }
 
+/** ดึงรายละเอียดจาก PostgrestError ออกมาเป็น object ธรรมดา (ถ้า log ตรงๆ จะเห็นแค่ {}) */
+function describe(err: unknown): unknown {
+  if (err && typeof err === "object") {
+    const e = err as Record<string, unknown>;
+    return { message: e.message, code: e.code, details: e.details, hint: e.hint };
+  }
+  return err;
+}
+
 function fail(userMessage: string, err: unknown): never {
-  console.error(`[alarms] ${userMessage}`, err);
+  console.error(`[alarms] ${userMessage}`, describe(err));
   throw new DataError(userMessage, err);
 }
 
@@ -183,7 +192,8 @@ export async function getTodaySummary(nowMs: number): Promise<TodaySummary> {
     base(),
   ]);
   for (const r of [critical, warning, info, pending, total]) {
-    if (r.error) fail("โหลดสรุปจำนวน alarm วันนี้ไม่สำเร็จ", r.error);
+    // HEAD request ไม่มี body → error.message มักว่าง จึงแนบ HTTP status ไว้ช่วยหาสาเหตุ
+    if (r.error) fail("โหลดสรุปจำนวน alarm วันนี้ไม่สำเร็จ", { ...describe(r.error) as object, status: r.status });
   }
   return {
     critical: critical.count ?? 0,

@@ -9,8 +9,8 @@
 > **ข้อมูลจำลอง:** ข้อมูล alarm และผลวิเคราะห์ที่แสดงในเว็บไซต์นี้เป็นข้อมูลจำลองเพื่อการทดสอบและสาธิตเท่านั้น
 > ไม่ใช่ข้อมูลจริงจากสถานีไฟฟ้า ทุกหน้ามีแถบแจ้งผู้ใช้เรื่องนี้ (`components/DemoNotice.tsx`)
 
-> **ใช้บน localhost หรือภายในองค์กรเท่านั้น** หน้า Dashboard ไม่มีระบบล็อกอิน
-> ห้าม deploy ขึ้นอินเทอร์เน็ตสาธารณะจนกว่าจะเพิ่มระบบล็อกอินสำหรับ Dashboard ด้วย
+> **ทุกหน้าต้อง Login with Google** (Supabase Auth) — Google account ใดก็เข้าได้ และทุกการเข้าหน้าถูกบันทึกใน `visit_logs`
+> หน้า `/test` ยังต้องใส่รหัสผ่านเพิ่มอีกชั้น
 
 ## สิ่งที่ต้องมี
 
@@ -36,6 +36,8 @@ cp .env.local.example .env.local
 |---|---|
 | `SUPABASE_URL` | URL ของโปรเจกต์ เช่น `https://xxxx.supabase.co` (ไม่ต้องมี `/rest/v1`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | secret key แบบใหม่ (`sb_secret_...`) หรือ legacy JWT ที่ role = `service_role` |
+| `SUPABASE_PUBLISHABLE_KEY` | publishable key (`sb_publishable_...`) หรือ anon JWT ใช้สำหรับ Login with Google |
+| `ADMIN_EMAILS` | อีเมลที่ได้สิทธิ์ ADMIN คั่นด้วย comma (ดูหน้า `/admin/visits` ได้) คนอื่นเป็น USER |
 | `TEST_PAGE_PASSWORD` | รหัสผ่านเข้าหน้า `/test` (แนะนำยาว 12 ตัวอักษรขึ้นไป) |
 | `USE_MOCK_DATA` | `true` = ใช้ข้อมูลจำลอง ไม่เชื่อมต่อ Supabase เลย |
 | `NEXT_PUBLIC_LINE_OA_QR_URL` | URL รูป QR แอดเพื่อน LINE OA (ค่าสาธารณะ แสดงในหน้า `/test`) |
@@ -48,6 +50,27 @@ cp .env.local.example .env.local
 จะแสดงข้อความบอกว่าต้องใช้ secret/service_role key (เพราะทุกตารางเปิด RLS และไม่มี policy)
 
 `.env.local` ถูก ignore ใน `.gitignore` แล้ว (`.env*`) มีเพียง `.env.local.example` ที่ commit ได้
+
+## ตั้งค่า Login with Google (ครั้งเดียว)
+
+1. **Google Cloud Console** → APIs & Services → Credentials → Create OAuth client ID (Web application)
+   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
+2. **Supabase** → Authentication → Sign In / Providers → Google: เปิดใช้ แล้วใส่ Client ID / Client Secret จากข้อ 1
+3. **Supabase** → Authentication → URL Configuration
+   - Site URL: URL หลักของเว็บ เช่น `https://scada-alarm-monitor.vercel.app`
+   - Redirect URLs: เพิ่ม `http://localhost:3000/auth/callback` และ `https://scada-alarm-monitor.vercel.app/auth/callback`
+4. **Supabase** → SQL Editor: รัน `supabase/visit_logs.sql` (บันทึกการเข้าชม) และ `supabase/alarm_submissions.sql` (นับจำนวนครั้งที่ส่งข้อมูล)
+5. ใส่ `SUPABASE_PUBLISHABLE_KEY` ใน `.env.local` และใน Vercel → Settings → Environment Variables แล้ว redeploy
+
+การทำงาน
+- `proxy.ts` refresh session และ redirect ผู้ที่ยังไม่ login ไป `/login` (หน้า / Server Action ยังตรวจซ้ำเองด้วย)
+- `components/VisitLogger.tsx` บันทึกทุกครั้งที่เปลี่ยนหน้า (ไม่นับ auto refresh) → `visit_logs`: เวลา, user id, อีเมล, path, IP, user agent
+- การกด "เพิ่ม alarm" ที่ส่งสำเร็จในหน้า `/test` ถูกบันทึก 1 แถวใน `alarm_submissions` (เวลา, อีเมล, event id, สถานี, point, ประเภท) → หน้า `/admin/visits` แสดงจำนวนครั้งที่ส่งต่อคน + รายการส่งข้อมูล
+- สิทธิ์: อีเมลใน `ADMIN_EMAILS` = **ADMIN** ดูหน้า `/admin/visits` (สรุปตามผู้ใช้ + รายการเข้าชม 1,000 รายการล่าสุด) ได้
+  คนอื่นทั้งหมด = **USER** เข้า `/admin/visits` จะเจอหน้า "ไม่มีสิทธิ์" (ตรวจฝั่ง server ก่อนดึงข้อมูล)
+- รายชื่อผู้ที่เคย login ดูได้ที่ Supabase → Authentication → Users
+- หน้า `/test` เติม Gmail ของบัญชีที่ login เป็นผู้รับแจ้งเตือนให้อัตโนมัติ (แก้หรือลบได้)
+- โหมด `USE_MOCK_DATA=true` ข้ามการ login และไม่บันทึกการเข้าชม
 
 ## รัน
 
@@ -67,6 +90,25 @@ npm run lint
 - ข้อมูลเก็บใน memory ของ server (รีสตาร์ตแล้วกลับเป็นข้อมูลเริ่มต้น)
 - ผล "วิเคราะห์" ในโหมดนี้เป็นกฎตายตัวใน `lib/mock-store.ts` ไม่ใช่ผลจาก AI จริง จะขึ้นภายใน 5–11 วินาทีหลังเพิ่ม
 - หน้า `/test` ยังต้องใช้ `TEST_PAGE_PASSWORD`
+
+### Auto test ระดับความรุนแรงของ AI (`npm run test:ai`)
+
+ส่ง preset ทั้ง 30 ข้อไปให้ bigbotagent (model `gemini-3.5-flash-lite`) วิเคราะห์**โดยตรง** แล้วเทียบ severity กับค่า `expected` ใน `lib/presets.ts`
+ไม่ผ่าน Supabase / Make จึงไม่ส่ง Gmail/LINE และไม่เสีย credit ของ Make (เสียเฉพาะค่าเรียก bigbotagent)
+
+1. ใส่ `BIGBOT_API_URL` และ `BIGBOT_API_KEY` (และ `GEMINI_MODEL` ถ้าไม่ใช่ `gemini-3.5-flash-lite`) ใน `.env.local`
+2. แทนที่ `scripts/ai-severity/prompt.txt` ด้วย prompt จริงจาก Make ใช้ตัวแปร `{{event_time}}` `{{sub}}` `{{point}}`
+   `{{point_type}}` `{{value}}` `{{low_th}}` `{{high_th}}` (threshold ว่างส่งเป็น `null`)
+3. รัน
+
+```bash
+npm run test:ai                    # ทุกเคส 1 รอบ
+npm run test:ai -- --only 3,5,22   # เฉพาะบางเคส
+npm run test:ai -- --runs 3        # ยิงซ้ำเคสละ 3 รอบ ดูว่าผลคงที่ไหม (ใช้ผลส่วนใหญ่)
+npm run test:ai -- --no-fail       # ไม่คืน exit code 1 เมื่อมีเคสไม่ตรง
+```
+
+ผลละเอียด (caption, recommended_action, เวลาตอบ) บันทึกเป็น JSON ใน `scripts/ai-severity/results/` (ignore ใน git)
 
 ## ข้อควรระวัง
 
@@ -124,6 +166,15 @@ app/
   test/page.tsx              หน้าทดสอบ (ตรวจ session ฝั่ง server)
   test/login/page.tsx        หน้าใส่รหัสผ่าน
   test/actions.ts            Server Actions: login/logout, เพิ่ม, ติดตามผล, ลบ
+  login/page.tsx             หน้า Login with Google
+  auth/actions.ts            Server Actions: เริ่ม Google OAuth / ออกจากระบบ
+  auth/callback/route.ts     แลก code จาก Google เป็น session
+  auth/visit.ts              บันทึกการเข้าชมลง visit_logs
+  admin/visits/page.tsx      หน้าประวัติการเข้าชม (ADMIN เท่านั้น)
+proxy.ts                     บังคับ login ทุกหน้า + refresh session
+supabase/visit_logs.sql      SQL สร้างตาราง visit_logs
+supabase/alarm_submissions.sql  SQL สร้างตาราง alarm_submissions (นับการส่งข้อมูล)
+lib/submissions.ts           บันทึก/ดึงประวัติการส่งข้อมูล
 components/
   SeverityBadge, AlarmTable, AlarmCard, AlarmDrawer, AlarmList,
   Filters, AutoRefresh, SummaryBar, AlarmForm, AnalysisTracker,
@@ -134,6 +185,7 @@ lib/
   validation.ts              zod schema ใช้ร่วมกันทั้ง client และ server
   presets.ts                 ชุดข้อมูลทดสอบ 30 รายการ
   test-auth.ts               session ของหน้า /test
+  auth.ts, auth-config.ts    Supabase Auth (ผู้ใช้ที่ login อยู่)
   mock-store.ts              ข้อมูลจำลอง
   mask.ts                    ปิดบังอีเมล / LINE User ID
   types.ts, format.ts

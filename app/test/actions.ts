@@ -7,7 +7,9 @@ import {
   getAlarmById,
   insertScadaEvent,
 } from "@/lib/alarms";
-import { ConfigError } from "@/lib/supabase-server";
+import { getCurrentUser } from "@/lib/auth";
+import { logSubmission } from "@/lib/submissions";
+import { ConfigError, isMockMode } from "@/lib/supabase-server";
 import {
   checkPassword,
   clearTestSession,
@@ -51,6 +53,11 @@ export async function logoutAction(): Promise<void> {
 
 /* ---------- helpers ---------- */
 
+/** ต้อง login with Google และผ่านรหัสผ่านหน้าทดสอบ (ตรวจซ้ำทุก action ไม่พึ่ง proxy) */
+async function isAuthorized(): Promise<boolean> {
+  return (await getCurrentUser()) !== null && (await isTestAuthenticated());
+}
+
 const NOT_AUTHORIZED = "เซสชันหมดอายุหรือยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบหน้าทดสอบใหม่";
 
 function errorMessage(err: unknown, fallback: string): string {
@@ -67,7 +74,8 @@ export type CreateAlarmResult =
   | { ok: false; error: string; fieldErrors?: FieldErrors };
 
 export async function createAlarmAction(input: AlarmFormInput): Promise<CreateAlarmResult> {
-  if (!(await isTestAuthenticated())) return { ok: false, error: NOT_AUTHORIZED };
+  const user = await getCurrentUser();
+  if (!user || !(await isTestAuthenticated())) return { ok: false, error: NOT_AUTHORIZED };
 
   const parsed = alarmFormSchema.safeParse(input);
   if (!parsed.success) {
@@ -89,6 +97,8 @@ export async function createAlarmAction(input: AlarmFormInput): Promise<CreateAl
       notify_line_user_id: d.notify_line_user_id,
     });
     await rememberTestedId(id);
+    // นับจำนวนครั้งที่ส่ง (ข้ามในโหมดข้อมูลจำลอง)
+    if (!isMockMode()) await logSubmission(user, { id, sub: d.sub, point: d.point, point_type: d.point_type });
     return { ok: true, id };
   } catch (err) {
     return { ok: false, error: errorMessage(err, "บันทึก alarm ไม่สำเร็จ") };
@@ -102,7 +112,7 @@ export type AlarmStatusResult =
   | { ok: false; error: string };
 
 export async function getAlarmStatusAction(id: string): Promise<AlarmStatusResult> {
-  if (!(await isTestAuthenticated())) return { ok: false, error: NOT_AUTHORIZED };
+  if (!(await isAuthorized())) return { ok: false, error: NOT_AUTHORIZED };
   if (!uuidSchema.safeParse(id).success) return { ok: false, error: "id ไม่ถูกต้อง" };
   try {
     return { ok: true, row: await getAlarmById(id) };
@@ -116,7 +126,7 @@ export async function getAlarmStatusAction(id: string): Promise<AlarmStatusResul
 export type DeleteAlarmResult = { ok: true } | { ok: false; error: string };
 
 export async function deleteAlarmAction(id: string): Promise<DeleteAlarmResult> {
-  if (!(await isTestAuthenticated())) return { ok: false, error: NOT_AUTHORIZED };
+  if (!(await isAuthorized())) return { ok: false, error: NOT_AUTHORIZED };
   if (!uuidSchema.safeParse(id).success) return { ok: false, error: "id ไม่ถูกต้อง" };
 
   // ลบได้เฉพาะแถวที่เพิ่มจากหน้าทดสอบในเบราว์เซอร์นี้ กันการลบ alarm จริงโดยไม่ตั้งใจ

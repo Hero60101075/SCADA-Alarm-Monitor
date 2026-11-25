@@ -1,10 +1,12 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { AlarmList } from "@/components/AlarmList";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { Filters } from "@/components/Filters";
 import { EmptyState, ErrorState, MockBadge } from "@/components/StatePanels";
 import { SummaryBar } from "@/components/SummaryBar";
+import { getCurrentUser } from "@/lib/auth";
 import { DataError, LIST_LIMIT, getRecentAlarms, getStations, getTodaySummary, parseFilters } from "@/lib/alarms";
 import { ConfigError, isMockMode } from "@/lib/supabase-server";
 import type { AlarmFilters, AlarmRow, TodaySummary } from "@/lib/types";
@@ -45,6 +47,7 @@ async function load(filters: AlarmFilters): Promise<LoadResult> {
 }
 
 async function DashboardContent({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
+  if (!(await getCurrentUser())) redirect("/login");
   const filters = parseFilters(await searchParams);
   const result = await load(filters);
   const { fetchedAt } = result;

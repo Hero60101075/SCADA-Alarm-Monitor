@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { NavLinks } from "./NavLinks";
+import { UserMenu } from "./UserMenu";
 
 export function SiteHeader() {
   return (
@@ -23,6 +25,9 @@ export function SiteHeader() {
           </span>
         </Link>
         <NavLinks />
+        <Suspense fallback={null}>
+          <UserMenu />
+        </Suspense>
       </div>
     </header>
   );

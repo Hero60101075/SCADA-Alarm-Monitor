@@ -38,3 +38,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ผลจาก npm run test:ai
+/scripts/ai-severity/results/

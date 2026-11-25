@@ -84,11 +84,14 @@ const COOLDOWN_SEC = 10;
 const inputCls =
   "h-9 w-full rounded-md border bg-white px-2.5 text-sm text-slate-900 transition-colors duration-150 placeholder:text-slate-400 aria-[invalid=true]:border-red-500 aria-[invalid=true]:bg-red-50/40";
 
-/** aside: เนื้อหาคอลัมน์ขวาบนจอกว้าง (เช่น รายการที่ทดสอบล่าสุด) — จอเล็กจะเรียงต่อด้านล่าง */
-export function AlarmForm({ aside }: { aside?: ReactNode }) {
+/**
+ * aside: เนื้อหาคอลัมน์ขวาบนจอกว้าง (เช่น รายการที่ทดสอบล่าสุด) — จอเล็กจะเรียงต่อด้านล่าง
+ * loginEmail: Gmail ของบัญชีที่ login อยู่ — เติมเป็นผู้รับแจ้งเตือนให้อัตโนมัติ
+ */
+export function AlarmForm({ aside, loginEmail = null }: { aside?: ReactNode; loginEmail?: string | null }) {
   const router = useRouter();
   const uid = useId();
-  const [values, setValues] = useState<AlarmFormInput>(EMPTY);
+  const [values, setValues] = useState<AlarmFormInput>(() => ({ ...EMPTY, notify_email: loginEmail ?? "" }));
   const [preset, setPreset] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -105,7 +108,8 @@ export function AlarmForm({ aside }: { aside?: ReactNode }) {
     setStorageChecked(true);
     const stored = readStored();
     if (stored) {
-      setValues((s) => ({ ...s, ...stored }));
+      // ใช้อีเมลของบัญชีที่ login ก่อนค่าที่จำไว้ในเบราว์เซอร์ (LINE User ID ยังใช้ค่าที่จำไว้)
+      setValues((s) => ({ ...s, ...stored, notify_email: loginEmail ?? stored.notify_email }));
       setHasStored(true);
     }
   }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans_Thai } from "next/font/google";
 import { DemoNotice } from "@/components/DemoNotice";
 import { SiteHeader } from "@/components/SiteHeader";
+import { VisitLogger } from "@/components/VisitLogger";
 import "./globals.css";
 
 const plexThai = IBM_Plex_Sans_Thai({
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           ข้ามไปยังเนื้อหาหลัก
         </a>
+        <VisitLogger />
         <SiteHeader />
         <DemoNotice />
         <main id="main" className="mx-auto w-full max-w-350 px-3 pb-16 sm:px-5 lg:px-8">
