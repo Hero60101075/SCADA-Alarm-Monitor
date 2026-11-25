@@ -3,14 +3,13 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { PRESETS, type AlarmPreset } from "@/lib/presets";
-import { SeverityDot } from "./SeverityBadge";
 
 const PLACEHOLDER = "— เลือก preset —";
 
+/** ไม่แสดงระดับที่คาดไว้ (expected) เพราะผลจริงขึ้นกับการวิเคราะห์ของ AI */
 function PresetLabel({ p }: { p: AlarmPreset }) {
   return (
     <>
-      <SeverityDot severity={p.expected} />
       <span className="truncate">
         {p.point_type} · {p.point}
       </span>
@@ -19,7 +18,7 @@ function PresetLabel({ p }: { p: AlarmPreset }) {
 }
 
 /**
- * Dropdown เลือก preset พร้อมจุดสีตามระดับที่คาดไว้ (<select> ใส่จุดที่จัดสไตล์ไม่ได้ จึงทำเป็น listbox เอง)
+ * Dropdown เลือก preset (listbox ทำเอง ให้หน้าตาเข้ากับฟอร์ม รองรับคีย์บอร์ดครบ)
  * value / onChange เป็น index ของ PRESETS แบบ string ("" = ยังไม่เลือก)
  */
 export function PresetSelect({
